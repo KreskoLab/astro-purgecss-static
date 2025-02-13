@@ -200,61 +200,60 @@ export function AstroPurgeCssPlugin(
         });
 
         createCacheDir();
+
         const purgeContent = await glob(
           options.content?.filter((item) => typeof item === "string") || [],
         );
 
-        await Promise.all(
-          tasks.map(async (task) => {
-            logger.info(`generating purged css for ${task.distUrl}`);
+        for (const task of tasks) {
+          logger.info(`generating purged css for ${task.distUrl}`);
 
-            const files = [...task.imports, ...purgeContent];
-            const cacheKey = getFilesHash(files) + ".json";
-            const cacheData = await getCacheFile(cacheKey);
-            const cache = JSON.parse(cacheData || "[]") as Cache[];
+          const files = [...task.imports, ...purgeContent];
+          const cacheKey = getFilesHash(files) + ".json";
+          const cacheData = await getCacheFile(cacheKey);
+          const cache = JSON.parse(cacheData || "[]") as Cache[];
 
-            let htmlFile = readFileSync(task.distUrl, "utf-8");
+          let htmlFile = readFileSync(task.distUrl, "utf-8");
 
-            if (!cache.length) {
-              const purgedCache: Cache[] = [];
-              const purged = (await task.purge?.()) || [];
+          if (!cache.length) {
+            const purgedCache: Cache[] = [];
+            const purged = (await task.purge?.()) || [];
 
-              purged
-                .filter(({ file }) => file?.endsWith(".css"))
-                .forEach((purged) => {
-                  const newCssFile = writeCssFile(
-                    purged.css,
-                    purged.file as string,
-                  );
+            purged
+              .filter(({ file }) => file?.endsWith(".css"))
+              .forEach((purged) => {
+                const newCssFile = writeCssFile(
+                  purged.css,
+                  purged.file as string,
+                );
 
-                  const purgedFileName = basename(purged.file as string);
-                  const newCssFileName = basename(newCssFile);
+                const purgedFileName = basename(purged.file as string);
+                const newCssFileName = basename(newCssFile);
 
-                  purgedCache.push({
-                    css: purged.css,
-                    purgedFile: purgedFileName,
-                    file: purged.file?.replace(
-                      purgedFileName,
-                      newCssFileName,
-                    ) as string,
-                  });
-
-                  htmlFile = htmlFile.replace(purgedFileName, newCssFileName);
+                purgedCache.push({
+                  css: purged.css,
+                  purgedFile: purgedFileName,
+                  file: purged.file?.replace(
+                    purgedFileName,
+                    newCssFileName,
+                  ) as string,
                 });
 
-              writeCacheFile(cacheKey, JSON.stringify(purgedCache));
-              writeFileSync(task.distUrl, htmlFile);
-            } else {
-              cache.forEach(({ css, file, purgedFile }) => {
-                writeFileSync(file, css);
-                const newCssFileName = basename(file);
-                htmlFile = htmlFile.replace(purgedFile, newCssFileName);
+                htmlFile = htmlFile.replace(purgedFileName, newCssFileName);
               });
 
-              writeFileSync(task.distUrl, htmlFile);
-            }
-          }),
-        );
+            writeCacheFile(cacheKey, JSON.stringify(purgedCache));
+            writeFileSync(task.distUrl, htmlFile);
+          } else {
+            cache.forEach(({ css, file, purgedFile }) => {
+              writeFileSync(file, css);
+              const newCssFileName = basename(file);
+              htmlFile = htmlFile.replace(purgedFile, newCssFileName);
+            });
+
+            writeFileSync(task.distUrl, htmlFile);
+          }
+        }
 
         //cleanup original css files
         cssFiles.forEach((cssFile) => {

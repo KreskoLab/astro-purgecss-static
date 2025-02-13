@@ -1,5 +1,11 @@
 # astro-purgecss-static
 
+## 1.0.3
+
+### Patch Changes
+
+- refactor: use for of loop
+
 ## 1.0.2
 
 ### Patch Changes
