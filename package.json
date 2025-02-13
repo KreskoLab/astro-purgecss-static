@@ -3,10 +3,14 @@
   "description": "Remove unused CSS from your Astro bundle (static mode)",
   "version": "1.0.0",
   "license": "MIT",
+  "author": "KreskoLab",
   "scripts": {
     "build": "tsup",
     "prettier": "prettier --write src/**/*.ts",
-    "test": "vitest"
+    "test": "vitest",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:publish": "pnpm run build && changeset publish"
   },
   "type": "module",
   "main": "./dist/index.js",
@@ -28,7 +32,10 @@
     "purgecss": "^6.0.0"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.5.0",
+    "@changesets/cli": "^2.27.12",
     "@types/node": "^22.8.2",
+    "add": "^2.0.6",
     "glob": "^11.0.0",
     "pathe": "^1.1.2",
     "prettier": "^3.3.3",
