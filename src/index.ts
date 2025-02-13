@@ -24,6 +24,12 @@ interface Task {
   purge?: () => Promise<ResultPurge[]>;
 }
 
+interface Cache {
+  css: string;
+  file: string;
+  purgedFile: string;
+}
+
 function filterModules(modules: readonly string[]): string[] {
   return modules
     .filter((item) => !/\.(jpe?g|png|webp|svg|gif|avif)/.test(item))
@@ -203,13 +209,15 @@ export function AstroPurgeCssPlugin(
             logger.info(`generating purged css for ${task.distUrl}`);
 
             const files = [...task.imports, ...purgeContent];
-            const cacheKey = getFilesHash(files);
-            const cache = await getCacheFile(cacheKey);
+            const cacheKey = getFilesHash(files) + ".json";
+            const cacheData = await getCacheFile(cacheKey);
+            const cache = JSON.parse(cacheData || "[]") as Cache[];
 
             let htmlFile = readFileSync(task.distUrl, "utf-8");
 
-            if (!cache) {
-              const purged = (await task.purge?.()) as ResultPurge[];
+            if (!cache.length) {
+              const purgedCache: Cache[] = [];
+              const purged = (await task.purge?.()) || [];
 
               purged
                 .filter(({ file }) => file?.endsWith(".css"))
@@ -222,13 +230,28 @@ export function AstroPurgeCssPlugin(
                   const purgedFileName = basename(purged.file as string);
                   const newCssFileName = basename(newCssFile);
 
+                  purgedCache.push({
+                    css: purged.css,
+                    purgedFile: purgedFileName,
+                    file: purged.file?.replace(
+                      purgedFileName,
+                      newCssFileName,
+                    ) as string,
+                  });
+
                   htmlFile = htmlFile.replace(purgedFileName, newCssFileName);
                 });
 
-              writeCacheFile(cacheKey, htmlFile);
+              writeCacheFile(cacheKey, JSON.stringify(purgedCache));
               writeFileSync(task.distUrl, htmlFile);
             } else {
-              writeFileSync(task.distUrl, cache);
+              cache.forEach(({ css, file, purgedFile }) => {
+                writeFileSync(file, css);
+                const newCssFileName = basename(file);
+                htmlFile = htmlFile.replace(purgedFile, newCssFileName);
+              });
+
+              writeFileSync(task.distUrl, htmlFile);
             }
           }),
         );
