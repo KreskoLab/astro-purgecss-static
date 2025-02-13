@@ -1,9 +1,16 @@
 {
   "name": "astro-purgecss-static",
   "description": "Remove unused CSS from your Astro bundle (static mode)",
+  "homepage": "https://github.com/KreskoLab/astro-purgecss-static",
   "version": "1.0.0",
   "license": "MIT",
   "author": "KreskoLab",
+  "keywords": [
+    "css",
+    "astro",
+    "astro-integration",
+    "purgecss"
+  ],
   "scripts": {
     "build": "tsup",
     "prettier": "prettier --write src/**/*.ts",
@@ -19,6 +26,10 @@
   "files": [
     "dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KreskoLab/astro-purgecss-static"
+  },
   "exports": {
     ".": {
       "import": {
