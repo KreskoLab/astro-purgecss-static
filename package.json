@@ -1,0 +1,40 @@
+{
+  "name": "astro-purgecss-static",
+  "description": "Remove unused CSS from your Astro bundle (static mode)",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsup",
+    "prettier": "prettier --write src/**/*.ts",
+    "test": "vitest"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "peerDependencies": {
+    "astro": "^5.0.3",
+    "purgecss": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.2",
+    "glob": "^11.0.0",
+    "pathe": "^1.1.2",
+    "prettier": "^3.3.3",
+    "rollup": "^4.24.3",
+    "tsup": "^8.3.5",
+    "vite": "^5.4.10",
+    "vitest": "^3.0.5"
+  }
+}
