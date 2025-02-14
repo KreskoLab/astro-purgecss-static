@@ -2,7 +2,7 @@
   "name": "astro-purgecss-static",
   "description": "Remove unused CSS from your Astro bundle (static mode)",
   "homepage": "https://github.com/KreskoLab/astro-purgecss-static",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "license": "MIT",
   "author": "KreskoLab",
   "keywords": [

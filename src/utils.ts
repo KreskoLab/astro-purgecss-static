@@ -30,11 +30,11 @@ export async function getCacheFile(fileName: string) {
   }
 }
 
-export async function writeCacheFile(fileName: string, content: string) {
+export function writeCacheFile(fileName: string, content: string) {
   const path = join(CACHE_DIR, fileName);
 
   try {
-    await writeFile(path, content);
+    writeFileSync(path, content);
     return path;
   } catch (error) {
     console.error("writeCacheFile", error);

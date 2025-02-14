@@ -1,5 +1,11 @@
 # astro-purgecss-static
 
+## 1.0.4
+
+### Patch Changes
+
+- refactor(utils): use writeFileSync for writeCacheFile
+
 ## 1.0.3
 
 ### Patch Changes

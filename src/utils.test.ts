@@ -2,7 +2,7 @@ import { join } from "pathe";
 import { createHash } from "node:crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { access, constants, readFile, writeFile } from "node:fs/promises";
+import { access, constants, readFile } from "node:fs/promises";
 import {
   CACHE_DIR,
   createCacheDir,
@@ -14,7 +14,6 @@ import {
 
 vi.mock("node:fs/promises", () => ({
   readFile: vi.fn(() => Promise.resolve()),
-  writeFile: vi.fn(() => Promise.resolve()),
   access: vi.fn(() => Promise.resolve()),
   constants: { F_OK: 0 },
 }));
@@ -78,8 +77,8 @@ describe("writeCacheFile", async () => {
     const FILENAME = "test_file";
     const DATA = "test_data";
     const PATH = join(CACHE_DIR, FILENAME);
-    await writeCacheFile(FILENAME, DATA);
-    expect(writeFile).toBeCalledWith(PATH, DATA);
+    writeCacheFile(FILENAME, DATA);
+    expect(writeFileSync).toBeCalledWith(PATH, DATA);
   });
 });
 
