@@ -1,26 +1,10 @@
-import { normalize, join } from "pathe";
+import { join } from "pathe";
 import { createHash } from "node:crypto";
-import { writeFile, access, readFile, constants } from "node:fs/promises";
-import { writeFileSync, readFileSync, mkdirSync, existsSync } from "node:fs";
+import { access, readFile, constants } from "node:fs/promises";
+import { writeFileSync, readFileSync } from "node:fs";
 
-export const CACHE_DIR = normalize(
-  process.cwd() + "/node_modules/.astro-purgecss-static/",
-);
-
-export async function createCacheDir() {
-  const isExist = existsSync(CACHE_DIR);
-
-  if (!isExist) {
-    try {
-      mkdirSync(CACHE_DIR);
-    } catch (error) {
-      console.error("createCacheDir", error);
-    }
-  }
-}
-
-export async function getCacheFile(fileName: string) {
-  const path = join(CACHE_DIR, fileName);
+export async function getCacheFile(fileName: string, dir: string) {
+  const path = join(dir, fileName);
 
   try {
     await access(path, constants.F_OK);
@@ -30,8 +14,8 @@ export async function getCacheFile(fileName: string) {
   }
 }
 
-export function writeCacheFile(fileName: string, content: string) {
-  const path = join(CACHE_DIR, fileName);
+export function writeCacheFile(fileName: string, content: string, dir: string) {
+  const path = join(dir, fileName);
 
   try {
     writeFileSync(path, content);

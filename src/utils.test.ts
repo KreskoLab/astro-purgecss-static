@@ -1,11 +1,9 @@
 import { join } from "pathe";
 import { createHash } from "node:crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { access, constants, readFile } from "node:fs/promises";
 import {
-  CACHE_DIR,
-  createCacheDir,
   getCacheFile,
   getFilesHash,
   writeCacheFile,
@@ -25,25 +23,7 @@ vi.mock("node:fs", () => ({
   writeFileSync: vi.fn(),
 }));
 
-describe("createCacheDir", async () => {
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("shoud create cache dir if not exist", async () => {
-    vi.mocked(existsSync).mockReturnValue(false);
-    await createCacheDir();
-    expect(existsSync).toBeCalledWith(CACHE_DIR);
-    expect(mkdirSync).toBeCalledWith(CACHE_DIR);
-  });
-
-  it("shoud skip dir creation if exists", async () => {
-    vi.mocked(existsSync).mockReturnValue(true);
-    await createCacheDir();
-    expect(existsSync).toBeCalledWith(CACHE_DIR);
-    expect(mkdirSync).not.toHaveBeenCalled();
-  });
-});
+const CACHE_DIR = "test/";
 
 describe("getCacheFile", async () => {
   afterEach(() => {
@@ -53,7 +33,7 @@ describe("getCacheFile", async () => {
   it("shoud return cache from file", async () => {
     const FILENAME = "test_file";
     const PATH = join(CACHE_DIR, FILENAME);
-    await getCacheFile(FILENAME);
+    await getCacheFile(FILENAME, CACHE_DIR);
     expect(access).toBeCalledWith(PATH, constants.F_OK);
     expect(readFile).toBeCalledWith(PATH, "utf-8");
   });
@@ -62,7 +42,7 @@ describe("getCacheFile", async () => {
     vi.mocked(access).mockRejectedValue(new Error(""));
     const FILENAME = "test_file_missed";
     const PATH = join(CACHE_DIR, FILENAME);
-    await getCacheFile(FILENAME);
+    await getCacheFile(FILENAME, CACHE_DIR);
     expect(access).toBeCalledWith(PATH, constants.F_OK);
     expect(readFile).not.toBeCalled();
   });
@@ -77,7 +57,7 @@ describe("writeCacheFile", async () => {
     const FILENAME = "test_file";
     const DATA = "test_data";
     const PATH = join(CACHE_DIR, FILENAME);
-    writeCacheFile(FILENAME, DATA);
+    writeCacheFile(FILENAME, DATA, CACHE_DIR);
     expect(writeFileSync).toBeCalledWith(PATH, DATA);
   });
 });

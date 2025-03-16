@@ -15,7 +15,6 @@ import {
   getFilesHash,
   getCacheFile,
   writeCacheFile,
-  createCacheDir,
 } from "./utils";
 
 interface Task {
@@ -107,6 +106,7 @@ export function AstroPurgeCssPlugin(
   };
   let resolvedRoutes: IntegrationResolvedRouteExtenteded[] = [];
   let astroConfig = {} as AstroConfig;
+  let cacheDir: string;
 
   return {
     name: "astro-purgecss-static",
@@ -124,6 +124,10 @@ export function AstroPurgeCssPlugin(
 
       "astro:routes:resolved": ({ routes }) => {
         resolvedRoutes = routes as IntegrationResolvedRouteExtenteded[];
+      },
+
+      "astro:config:setup": ({ createCodegenDir }) => {
+        cacheDir = createCodegenDir().pathname;
       },
 
       "astro:build:done": async ({ dir, assets, logger }) => {
@@ -199,8 +203,6 @@ export function AstroPurgeCssPlugin(
             });
         });
 
-        createCacheDir();
-
         const purgeContent = await glob(
           options.content?.filter((item) => typeof item === "string") || [],
         );
@@ -210,12 +212,15 @@ export function AstroPurgeCssPlugin(
 
           const files = [...task.imports, ...purgeContent];
           const cacheKey = getFilesHash(files) + ".json";
-          const cacheData = await getCacheFile(cacheKey);
+          const cacheData = await getCacheFile(cacheKey, cacheDir);
           const cache = JSON.parse(cacheData || "[]") as Cache[];
 
           let htmlFile = readFileSync(task.distUrl, "utf-8");
+          const isCacheCssExist =
+            cache.length > 0 &&
+            cache.every(({ purgedFile }) => htmlFile.includes(purgedFile));
 
-          if (!cache.length) {
+          if (!isCacheCssExist) {
             const purgedCache: Cache[] = [];
             const purged = (await task.purge?.()) || [];
 
@@ -242,7 +247,7 @@ export function AstroPurgeCssPlugin(
                 htmlFile = htmlFile.replace(purgedFileName, newCssFileName);
               });
 
-            writeCacheFile(cacheKey, JSON.stringify(purgedCache));
+            writeCacheFile(cacheKey, JSON.stringify(purgedCache), cacheDir);
             writeFileSync(task.distUrl, htmlFile);
           } else {
             cache.forEach(({ css, file, purgedFile }) => {
